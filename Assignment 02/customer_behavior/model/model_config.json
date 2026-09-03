@@ -1,0 +1,34 @@
+{
+  "random_seed": 42,
+  "min_class_samples": 20,
+  "target": "Class Name",
+  "rare_classes_grouped_to_other": [
+    "Casual bottoms",
+    "Chemises"
+  ],
+  "numeric_features": [
+    "Age",
+    "Rating",
+    "Recommended IND",
+    "Positive Feedback Count",
+    "review_length",
+    "review_word_count"
+  ],
+  "categorical_features": [
+    "Division Name",
+    "Department Name"
+  ],
+  "text_feature": "Review Text",
+  "selected_model": "Logistic Regression",
+  "train_rows": 18760,
+  "test_rows": 4691,
+  "transformed_train_shape": [
+    18760,
+    12015
+  ],
+  "transformed_test_shape": [
+    4691,
+    12015
+  ],
+  "serialization_note": "No lambda/FunctionTransformer is used; pipeline is joblib-serializable."
+}

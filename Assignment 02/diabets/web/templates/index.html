@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Dự Đoán Bệnh Tiểu Đường</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>DỰ ĐOÁN TIỂU ĐƯỜNG</h1>
+                        <span>Hệ thống hỗ trợ chẩn đoán sớm</span>
+                    </div>
+                </div>
+                <div class="header-badge">
+                    <span class="badge">AI-Powered</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Introduction -->
+            <section class="intro-section">
+                <div class="intro-card">
+                    <div class="intro-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h2>Đánh giá nguy cơ tiểu đường</h2>
+                    <p>Nhập thông tin sức khỏe của bạn để nhận dự đoán và lời khuyên từ hệ thống trí tuệ nhân tạo</p>
+                </div>
+            </section>
+
+            <!-- Prediction Form -->
+            <section class="form-section">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h3><i class="fas fa-notes-medical"></i> Thông tin sức khỏe</h3>
+                        <p class="form-subtitle">Vui lòng điền đầy đủ thông tin để có kết quả chính xác nhất</p>
+                    </div>
+                    
+                    <form id="predict-form" class="predict-form">
+                        <!-- Personal Information -->
+                        <div class="form-group">
+                            <h4 class="group-title"><i class="fas fa-user"></i> Thông tin cá nhân</h4>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="age">Tuổi <span class="required">*</span></label>
+                                    <input type="number" id="age" name="age" min="18" max="120" placeholder="18-120" required>
+                                </div>
+                                <div class="col">
+                                    <label for="gender">Giới tính <span class="required">*</span></label>
+                                    <select id="gender" name="gender" required>
+                                        <option value="">Chọn giới tính</option>
+                                        <option value="Male">Nam</option>
+                                        <option value="Female">Nữ</option>
+                                        <option value="Other">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lifestyle -->
+                        <div class="form-group">
+                            <h4 class="group-title"><i class="fas fa-running"></i> Lối sống</h4>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="smoking_status">Hút thuốc</label>
+                                    <select id="smoking_status" name="smoking_status">
+                                        <option value="Never">Không hút</option>
+                                        <option value="Former">Đã bỏ</option>
+                                        <option value="Current">Đang hút</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label for="alcohol_consumption_per_week">Uống rượu (đơn vị/tuần)</label>
+                                    <input type="number" id="alcohol_consumption_per_week" name="alcohol_consumption_per_week" min="0" max="20" value="0">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="physical_activity_minutes_per_week">Vận động (phút/tuần)</label>
+                                    <input type="number" id="physical_activity_minutes_per_week" name="physical_activity_minutes_per_week" min="0" max="5000" value="150">
+                                </div>
+                                <div class="col">
+                                    <label for="diet_score">Điểm chế độ ăn (0-10)</label>
+                                    <input type="number" id="diet_score" name="diet_score" min="0" max="10" step="0.1" value="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical History -->
+                        <div class="form-group">
+                            <h4 class="group-title"><i class="fas fa-notes-medical"></i> Tiền sử bệnh</h4>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="family_history_diabetes" name="family_history_diabetes" value="1">
+                                    <span class="checkmark"></span>
+                                    Gia đình có người bị tiểu đường
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hypertension_history" name="hypertension_history" value="1">
+                                    <span class="checkmark"></span>
+                                    Tiền sử tăng huyết áp
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="cardiovascular_history" name="cardiovascular_history" value="1">
+                                    <span class="checkmark"></span>
+                                    Tiền sử bệnh tim mạch
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Physical Measurements -->
+                        <div class="form-group">
+                            <h4 class="group-title"><i class="fas fa-ruler-vertical"></i> Chỉ số cơ thể</h4>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="bmi">BMI <span class="required">*</span></label>
+                                    <input type="number" id="bmi" name="bmi" min="15" max="50" step="0.1" placeholder="15-50" required>
+                                </div>
+                                <div class="col">
+                                    <label for="waist_to_hip_ratio">Tỷ lệ eo/hông</label>
+                                    <input type="number" id="waist_to_hip_ratio" name="waist_to_hip_ratio" min="0.5" max="1.2" step="0.01" placeholder="0.5-1.2" value="0.85">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="systolic_bp">Huyết áp tâm thu <span class="required">*</span></label>
+                                    <input type="number" id="systolic_bp" name="systolic_bp" min="90" max="300" placeholder="90-300" required>
+                                </div>
+                                <div class="col">
+                                    <label for="diastolic_bp">Huyết áp tâm trương <span class="required">*</span></label>
+                                    <input type="number" id="diastolic_bp" name="diastolic_bp" min="50" max="150" placeholder="50-150" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="heart_rate">Nhịp tim (nhịp/phút)</label>
+                                    <input type="number" id="heart_rate" name="heart_rate" min="40" max="120" placeholder="40-120" value="72">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Laboratory Results -->
+                        <div class="form-group">
+                            <h4 class="group-title"><i class="fas fa-flask"></i> Kết quả xét nghiệm</h4>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="glucose_fasting">Đường huyết lúc đói (mg/dL) <span class="required">*</span></label>
+                                    <input type="number" id="glucose_fasting" name="glucose_fasting" min="50" max="300" placeholder="50-300" required>
+                                </div>
+                                <div class="col">
+                                    <label for="glucose_postprandial">Đường huyết sau ăn (mg/dL) <span class="required">*</span></label>
+                                    <input type="number" id="glucose_postprandial" name="glucose_postprandial" min="70" max="400" placeholder="70-400" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="hba1c">HbA1c (%) <span class="required">*</span></label>
+                                    <input type="number" id="hba1c" name="hba1c" min="4" max="14" step="0.01" placeholder="4-14" required>
+                                </div>
+                                <div class="col">
+                                    <label for="insulin_level">Insulin (µIU/mL)</label>
+                                    <input type="number" id="insulin_level" name="insulin_level" min="2" max="50" step="0.01" placeholder="2-50" value="10">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="cholesterol_total">Cholesterol tổng (mg/dL)</label>
+                                    <input type="number" id="cholesterol_total" name="cholesterol_total" min="100" max="350" placeholder="100-350">
+                                </div>
+                                <div class="col">
+                                    <label for="triglycerides">Triglycerides (mg/dL)</label>
+                                    <input type="number" id="triglycerides" name="triglycerides" min="30" max="500" placeholder="30-500" value="120">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="ldl_cholesterol">LDL Cholesterol (mg/dL)</label>
+                                    <input type="number" id="ldl_cholesterol" name="ldl_cholesterol" min="20" max="300" placeholder="20-300" value="100">
+                                </div>
+                                <div class="col">
+                                    <label for="hdl_cholesterol">HDL Cholesterol (mg/dL)</label>
+                                    <input type="number" id="hdl_cholesterol" name="hdl_cholesterol" min="20" max="100" placeholder="20-100" value="50">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary" id="predict-btn">
+                                <i class="fas fa-stethoscope"></i> Dự đoán nguy cơ
+                            </button>
+                            <button type="reset" class="btn-secondary">
+                                <i class="fas fa-undo"></i> Xóa
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <div class="results-card">
+                    <div class="results-header">
+                        <h3><i class="fas fa-chart-pie"></i> Kết quả dự đoán</h3>
+                    </div>
+                    
+                    <div class="results-content">
+                        <!-- Prediction Result -->
+                        <div class="prediction-result" id="prediction-result">
+                            <div class="result-badge" id="result-badge">
+                                <span class="result-icon"><i class="fas fa-check-circle"></i></span>
+                                <span class="result-text" id="result-text">Đang xử lý...</span>
+                            </div>
+                            <div class="result-probability">
+                                <div class="probability-bar">
+                                    <div class="probability-fill" id="probability-fill" style="width: 0%;"></div>
+                                </div>
+                                <div class="probability-text">
+                                    <span>Độ tin cậy:</span>
+                                    <span id="probability-text">0%</span>
+                                </div>
+                            </div>
+                            <div class="result-message" id="result-message"></div>
+                        </div>
+
+                        <!-- Advice -->
+                        <div class="advice-section">
+                            <h4><i class="fas fa-lightbulb"></i> Lời khuyên sức khỏe</h4>
+                            <div id="advice-container">
+                                <div class="advice-loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tạo lời khuyên...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loading-overlay">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Đang phân tích dữ liệu...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p><strong>Hệ thống dự đoán tiểu đường</strong> - Hỗ trợ chẩn đoán sớm và phòng ngừa</p>
+                    <p class="footer-disclaimer">⚠️ Thông tin chỉ mang tính tham khảo. Vui lòng tham khảo ý kiến bác sĩ để được tư vấn chính xác.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#" target="_blank"><i class="fas fa-info-circle"></i> Giới thiệu</a>
+                    <a href="#" target="_blank"><i class="fas fa-envelope"></i> Liên hệ</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>🏠 Dự đoán giá nhà</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Navigation */
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #2c3e50, #3498db) !important;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        /* Main */
+        .main-title {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        
+        /* Card */
+        .prediction-card {
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        /* Form */
+        .form-label {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 0.9rem;
+        }
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            -webkit-appearance: none;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+        }
+        .form-control-lg {
+            font-size: 1.05rem;
+            padding: 14px 16px;
+        }
+        
+        /* Button */
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.7;
+            transform: none;
+        }
+        
+        /* Result */
+        .result-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .prediction-price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .prediction-price .currency {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+        .prediction-price-full {
+            font-size: 1.1rem;
+            color: #27ae60;
+            font-weight: 600;
+        }
+        .prediction-detail {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        /* Factors Grid */
+        .factors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        .factor-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        .factor-item .factor-label {
+            font-size: 0.7rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        .factor-item .factor-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .factor-item .factor-impact {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .factor-item .factor-impact.high { color: #27ae60; }
+        .factor-item .factor-impact.low { color: #e74c3c; }
+        .factor-item .factor-impact.medium { color: #f39c12; }
+        
+        /* Explanation */
+        .explanation-box {
+            background: #fff3cd;
+            border-radius: 12px;
+            border-left: 4px solid #ffc107;
+            font-size: 0.9rem;
+            color: #856404;
+            padding: 12px 16px;
+        }
+        
+        /* Knowledge Graph */
+        .graph-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px;
+            min-height: 250px;
+            border: 2px solid #e9ecef;
+            overflow: hidden;
+        }
+        .graph-container svg {
+            width: 100%;
+            height: 250px;
+        }
+        .graph-container .node circle {
+            cursor: pointer;
+            transition: r 0.3s ease;
+        }
+        .graph-container .node circle:hover {
+            r: 24;
+        }
+        .graph-container .node text {
+            font-size: 10px;
+            fill: #fff;
+            font-weight: 600;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        .graph-container .edge text {
+            font-size: 8px;
+            fill: #6c757d;
+            text-anchor: middle;
+        }
+        
+        /* Loading */
+        .spinner-border {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #result:not(.d-none) {
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        /* Responsive - Mobile First */
+        @media (max-width: 576px) {
+            .container { padding-left: 12px; padding-right: 12px; }
+            .main-title { font-size: 1.5rem; }
+            .subtitle { font-size: 0.85rem; }
+            .prediction-price { font-size: 1.6rem; }
+            .prediction-price-full { font-size: 0.95rem; }
+            .card-body { padding: 1.2rem !important; }
+            .form-control, .form-select { font-size: 0.9rem; padding: 10px 12px; }
+            .form-control-lg { font-size: 0.95rem; padding: 12px 14px; }
+            .factors-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .factor-item { padding: 6px 4px; }
+            .factor-item .factor-value { font-size: 0.95rem; }
+            .graph-container svg { height: 200px; }
+            .btn-primary { font-size: 1rem; padding: 12px; }
+            .navbar-brand { font-size: 1.1rem; }
+        }
+        
+        @media (max-width: 400px) {
+            .main-title { font-size: 1.2rem; }
+            .prediction-price { font-size: 1.3rem; }
+            .factors-grid { grid-template-columns: repeat(2, 1fr); }
+            .graph-container svg { height: 180px; }
+        }
+        
+        /* Touch friendly */
+        .form-control, .form-select, .btn, .form-check-input {
+            touch-action: manipulation;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-home me-2"></i> HousePrice AI
+            </a>
+            <span class="text-white-50 small">
+                <i class="fas fa-phone-alt me-1"></i> Mobile
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mt-3 mt-md-4 mb-5">
+        <!-- Header -->
+        <div class="text-center mb-3 mb-md-4">
+            <h1 class="main-title">
+                <i class="fas fa-calculator text-primary"></i> Dự đoán giá nhà
+            </h1>
+            <p class="subtitle">Nhập thông tin ngôi nhà để nhận dự đoán giá</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-12">
+                <div class="card prediction-card">
+                    <div class="card-body p-3 p-md-4 p-lg-5">
+                        <h5 class="card-title mb-3 mb-md-4">
+                            <i class="fas fa-sliders-h me-2"></i> Thông tin bất động sản
+                        </h5>
+
+                        <!-- Form -->
+                        <form id="predictionForm" novalidate>
+                            <!-- Location -->
+                            <div class="mb-3">
+                                <label for="location" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i> Vị trí <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-lg" id="location" required>
+                                    <option value="">-- Chọn vị trí --</option>
+                                    {% for loc in locations %}
+                                    <option value="{{ loc }}">{{ loc }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn vị trí</div>
+                            </div>
+
+                            <!-- Area -->
+                            <div class="mb-3">
+                                <label for="area_m2" class="form-label">
+                                    <i class="fas fa-arrows-alt me-1"></i> Diện tích (m²) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control form-control-lg" id="area_m2" 
+                                       placeholder="VD: 50" min="1" step="1" required>
+                                <div class="invalid-feedback">Vui lòng nhập diện tích hợp lệ</div>
+                            </div>
+
+                            <!-- Rooms -->
+                            <div class="row g-2 g-md-3">
+                                <div class="col-4">
+                                    <label for="bedrooms" class="form-label">
+                                        <i class="fas fa-bed me-1"></i> Phòng ngủ
+                                    </label>
+                                    <input type="number" class="form-control" id="bedrooms" 
+                                           placeholder="Số" min="1" step="1" required>
+                                </div>
+                                <div class="col-4">
+                                    <label for="bathrooms" class="form-label">
+                                        <i class="fas fa-bath me-1"></i> Phòng tắm
+                                    </label>
+                                    <input type="number" class="form-control" id="bathrooms" 
+                                           placeholder="Số" min="1" step="1" required>
+                                </div>
+                                <div class="col-4">
+                                    <label for="floors" class="form-label">
+                                        <i class="fas fa-layer-group me-1"></i> Số tầng
+                                    </label>
+                                    <input type="number" class="form-control" id="floors" 
+                                           placeholder="Số" min="1" step="1" required>
+                                </div>
+                            </div>
+
+                            <!-- Frontage -->
+                            <div class="mb-3 mt-3">
+                                <label class="form-label">
+                                    <i class="fas fa-door-open me-1"></i> Mặt tiền
+                                </label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="frontage" id="frontageYes" value="true">
+                                        <label class="form-check-label" for="frontageYes">Có</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="frontage" id="frontageNo" value="false" checked>
+                                        <label class="form-check-label" for="frontageNo">Không</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="predictBtn">
+                                <i class="fas fa-calculator me-2"></i> Dự đoán giá
+                            </button>
+                        </form>
+
+                        <!-- Loading -->
+                        <div id="loading" class="text-center mt-4 d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Đang xử lý...</span>
+                            </div>
+                            <p class="mt-2 mb-0 text-muted">Đang dự đoán...</p>
+                        </div>
+
+                        <!-- Result -->
+                        <div id="result" class="mt-4 d-none">
+                            <hr>
+                            <h5 class="text-center">
+                                <i class="fas fa-chart-line text-primary"></i> Kết quả dự đoán
+                            </h5>
+                            <div class="result-box text-center p-3">
+                                <div class="prediction-price" id="predictionPrice">
+                                    --,-- triệu VND
+                                </div>
+                                <div class="prediction-price-full mt-1" id="predictionPriceFull"></div>
+                                <div class="prediction-detail mt-2" id="priceBreakdown"></div>
+                            </div>
+
+                            <!-- Knowledge Graph -->
+                            <div class="mt-3">
+                                <h6 class="text-center small text-muted">
+                                    <i class="fas fa-project-diagram"></i> Phân tích yếu tố ảnh hưởng
+                                </h6>
+                                <div id="knowledgeGraph" class="graph-container">
+                                    <div class="text-center text-muted py-3 small">
+                                        <i class="fas fa-spinner fa-spin d-block mb-2"></i>
+                                        Đang tạo biểu đồ...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Explanation -->
+                            <div class="explanation-box mt-2 p-2 p-md-3">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>
+                                <span id="explanationText" class="small">Đang phân tích...</span>
+                            </div>
+
+                            <!-- Factors -->
+                            <div class="factors-grid mt-3" id="factorsGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-4 text-muted small">
+            <i class="fas fa-robot"></i> Hệ thống dự đoán giá nhà thông minh
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+        // DOM elements
+        const form = document.getElementById('predictionForm');
+        const predictBtn = document.getElementById('predictBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const predictionPrice = document.getElementById('predictionPrice');
+        const predictionPriceFull = document.getElementById('predictionPriceFull');
+        const priceBreakdown = document.getElementById('priceBreakdown');
+        const explanationText = document.getElementById('explanationText');
+        const factorsGrid = document.getElementById('factorsGrid');
+        const knowledgeGraph = document.getElementById('knowledgeGraph');
+
+        const API_URL = '/api/predict';
+        const COLORS = {
+            house: '#3498db',
+            factor: '#2ecc71',
+            price: '#e74c3c',
+            edge: '#95a5a6'
+        };
+
+        // Form submit
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate
+            const location = document.getElementById('location').value;
+            const area = parseFloat(document.getElementById('area_m2').value);
+            
+            if (!location) {
+                document.getElementById('location').classList.add('is-invalid');
+                return;
+            }
+            document.getElementById('location').classList.remove('is-invalid');
+            
+            if (!area || area <= 0) {
+                document.getElementById('area_m2').classList.add('is-invalid');
+                return;
+            }
+            document.getElementById('area_m2').classList.remove('is-invalid');
+            
+            const formData = {
+                location: location,
+                area_m2: area,
+                bedrooms: parseInt(document.getElementById('bedrooms').value) || 1,
+                bathrooms: parseInt(document.getElementById('bathrooms').value) || 1,
+                floors: parseInt(document.getElementById('floors').value) || 1,
+                frontage: document.querySelector('input[name="frontage"]:checked').value === 'true'
+            };
+            
+            // Show loading
+            loading.classList.remove('d-none');
+            result.classList.add('d-none');
+            predictBtn.disabled = true;
+            predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang xử lý...';
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResult(data);
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể dự đoán'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+            } finally {
+                loading.classList.add('d-none');
+                predictBtn.disabled = false;
+                predictBtn.innerHTML = '<i class="fas fa-calculator me-2"></i> Dự đoán giá';
+            }
+        });
+
+        function displayResult(data) {
+            result.classList.remove('d-none');
+            
+            // Price
+            predictionPrice.innerHTML = `
+                ${data.prediction.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 
+                <span class="currency">triệu VND</span>
+            `;
+            
+            // Price full
+            if (data.prediction >= 1000) {
+                predictionPriceFull.textContent = `≈ ${(data.prediction/1000).toFixed(2)} tỷ VND`;
+                predictionPriceFull.style.display = 'block';
+            } else {
+                predictionPriceFull.style.display = 'none';
+            }
+            
+            // Breakdown
+            const factors = data.factors;
+            priceBreakdown.textContent = `Giá cơ bản: ${factors.base_price.toFixed(0)} triệu × ${factors.total_factor.toFixed(2)} (hệ số tổng hợp)`;
+            
+            // Explanation
+            explanationText.textContent = factors.explanation || 'Phân tích hoàn chỉnh';
+            
+            // Factors
+            renderFactors(data);
+            
+            // Knowledge Graph
+            renderKnowledgeGraph(data.knowledge_graph);
+            
+            // Scroll
+            result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderFactors(data) {
+            const factors = data.factors;
+            const items = [
+                { label: 'Vị trí', value: factors.location_factor.toFixed(2), 
+                  impact: factors.location_factor >= 1.2 ? 'high' : factors.location_factor <= 0.8 ? 'low' : 'medium' },
+                { label: 'Diện tích', value: factors.area_factor.toFixed(2),
+                  impact: factors.area_factor >= 1.2 ? 'high' : factors.area_factor <= 0.8 ? 'low' : 'medium' },
+                { label: 'Phòng ngủ', value: factors.bedroom_factor.toFixed(2),
+                  impact: factors.bedroom_factor >= 1.2 ? 'high' : factors.bedroom_factor <= 0.8 ? 'low' : 'medium' },
+                { label: 'Phòng tắm', value: factors.bathroom_factor.toFixed(2),
+                  impact: factors.bathroom_factor >= 1.2 ? 'high' : factors.bathroom_factor <= 0.8 ? 'low' : 'medium' },
+                { label: 'Số tầng', value: factors.floor_factor.toFixed(2),
+                  impact: factors.floor_factor >= 1.2 ? 'high' : factors.floor_factor <= 0.8 ? 'low' : 'medium' },
+                { label: 'Mặt tiền', value: factors.frontage_factor.toFixed(2),
+                  impact: factors.frontage_factor >= 1.2 ? 'high' : 'medium' }
+            ];
+            
+            factorsGrid.innerHTML = items.map(item => `
+                <div class="factor-item">
+                    <div class="factor-label">${item.label}</div>
+                    <div class="factor-value">${item.value}</div>
+                    <div class="factor-impact ${item.impact}">${item.impact.toUpperCase()}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderKnowledgeGraph(graphData) {
+            if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
+                knowledgeGraph.innerHTML = '<div class="text-center text-muted py-3 small">Không có dữ liệu</div>';
+                return;
+            }
+            
+            knowledgeGraph.innerHTML = '';
+            
+            const containerWidth = knowledgeGraph.clientWidth || 400;
+            const width = Math.min(containerWidth, 600);
+            const height = Math.min(250, width * 0.45);
+            const margin = { top: 15, right: 20, bottom: 15, left: 20 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+            
+            const svg = d3.select(knowledgeGraph)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('display', 'block')
+                .style('margin', '0 auto')
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            const nodes = graphData.nodes.map(n => ({
+                id: n.id,
+                label: n.label,
+                type: n.type,
+                properties: n.properties
+            }));
+            
+            const edges = graphData.edges.map(e => ({
+                source: e.source,
+                target: e.target,
+                label: e.label,
+                weight: e.weight || 1
+            }));
+            
+            const nodeMap = {};
+            nodes.forEach(n => nodeMap[n.id] = n);
+            
+            const links = edges.map(e => ({
+                source: nodeMap[e.source],
+                target: nodeMap[e.target],
+                label: e.label,
+                weight: e.weight
+            }));
+            
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links)
+                    .id(d => d.id)
+                    .distance(d => Math.min(80, 120 - d.weight * 20))
+                    .strength(0.5))
+                .force('charge', d3.forceManyBody().strength(-150))
+                .force('center', d3.forceCenter(innerWidth / 2, innerHeight / 2))
+                .force('collision', d3.forceCollide().radius(25));
+            
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('stroke', COLORS.edge)
+                .attr('stroke-width', d => 1 + d.weight * 0.3)
+                .attr('stroke-opacity', 0.5);
+            
+            const linkLabels = svg.append('g')
+                .selectAll('text')
+                .data(links)
+                .enter()
+                .append('text')
+                .attr('fill', '#6c757d')
+                .attr('font-size', '8px')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'central')
+                .text(d => d.label);
+            
+            const nodeGroup = svg.append('g')
+                .selectAll('g')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .call(d3.drag()
+                    .on('start', function(event, d) {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    })
+                    .on('drag', function(event, d) {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    })
+                    .on('end', function(event, d) {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null;
+                        d.fy = null;
+                    }));
+            
+            nodeGroup.append('circle')
+                .attr('r', d => d.type === 'Chính' ? 24 : d.type === 'Kết quả' ? 22 : 18)
+                .attr('fill', d => {
+                    if (d.type === 'Chính') return COLORS.house;
+                    if (d.type === 'Kết quả') return COLORS.price;
+                    return COLORS.factor;
+                })
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .attr('opacity', 0.9);
+            
+            nodeGroup.append('text')
+                .attr('fill', '#fff')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'bold')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'central')
+                .text(d => d.label.length > 8 ? d.label.substring(0, 6) + '..' : d.label);
+            
+            nodeGroup.on('mouseover', function(event, d) {
+                const props = d.properties;
+                const text = Object.entries(props)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join('\n');
+                const node = d3.select(this);
+                node.append('title').text(text);
+            });
+            
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                linkLabels
+                    .attr('x', d => (d.source.x + d.target.x) / 2)
+                    .attr('y', d => (d.source.y + d.target.y) / 2 - 6);
+                
+                nodeGroup
+                    .attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', function() {
+            knowledgeGraph.innerHTML = `
+                <div class="text-center text-muted py-3 small">
+                    <i class="fas fa-project-diagram fa-2x d-block mb-2"></i>
+                    Nhập thông tin và dự đoán để xem phân tích
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

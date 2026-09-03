@@ -1,0 +1,33 @@
+{
+  "random_seed": 42,
+  "task": "regression",
+  "target": "price_million_vnd",
+  "selected_model": "Random Forest Regressor",
+  "numeric_features": [
+    "timeline_hours",
+    "area_m2",
+    "bedrooms",
+    "bathrooms",
+    "floors"
+  ],
+  "categorical_features": [
+    "location"
+  ],
+  "dropped_columns": [
+    "id",
+    "detail_url",
+    "title"
+  ],
+  "split": {
+    "train": 0.7,
+    "validation": 0.15,
+    "test": 0.15
+  },
+  "target_unit": "million VND",
+  "preprocessing": {
+    "numeric_imputation": "median",
+    "categorical_imputation": "most_frequent",
+    "categorical_encoding": "OneHotEncoder(handle_unknown=ignore)",
+    "scaling": "StandardScaler for Linear/Ridge; no scaling for tree models"
+  }
+}

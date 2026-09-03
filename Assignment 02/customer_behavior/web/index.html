@@ -1,0 +1,316 @@
+<!-- web/index.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Customer Behavior Analysis</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛍️ E-Commerce Customer Behavior Analysis</h1>
+            <p>Dự đoán sản phẩm khách hàng quan tâm dựa trên đánh giá</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Form nhập liệu -->
+            <div class="input-section">
+                <h2>Thông tin khách hàng</h2>
+                <form id="predictionForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="age">Tuổi</label>
+                            <input type="number" id="age" name="age" value="35" min="18" max="99" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rating">Đánh giá (1-5)</label>
+                            <input type="number" id="rating" name="rating" value="5" min="1" max="5" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="recommended_ind">Đề xuất sản phẩm</label>
+                            <select id="recommended_ind" name="recommended_ind">
+                                <option value="1">Có đề xuất</option>
+                                <option value="0">Không đề xuất</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="feedback_count">Số lượt phản hồi tích cực</label>
+                            <input type="number" id="feedback_count" name="feedback_count" value="5" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="division_name">Phân khu</label>
+                            <select id="division_name" name="division_name">
+                                <option value="General">General</option>
+                                <option value="General Petite">General Petite</option>
+                                <option value="Initmates">Initmates</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="department_name">Bộ phận</label>
+                            <select id="department_name" name="department_name">
+                                <option value="Tops">Tops</option>
+                                <option value="Bottoms">Bottoms</option>
+                                <option value="Dresses">Dresses</option>
+                                <option value="Intimate">Intimate</option>
+                                <option value="Jackets">Jackets</option>
+                                <option value="Trend">Trend</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="review_text">Nội dung đánh giá</label>
+                        <textarea id="review_text" name="review_text" rows="4" placeholder="Nhập đánh giá của khách hàng...">Sản phẩm này thật tuyệt vời! Tôi rất thích chất liệu và kiểu dáng. Màu sắc đẹp và phù hợp với nhiều dịp.</textarea>
+                    </div>
+
+                    <button type="submit" id="predictBtn">🔮 Dự đoán sản phẩm</button>
+                </form>
+            </div>
+
+            <!-- Kết quả dự đoán -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <h2>Kết quả dự đoán</h2>
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="prediction-class" id="predictionClass">Knits</div>
+                        <div class="prediction-confidence" id="predictionConfidence">Độ tin cậy: 85%</div>
+                    </div>
+                    
+                    <div class="top-predictions">
+                        <h3>Top 5 dự đoán</h3>
+                        <div id="topPredictions"></div>
+                    </div>
+                </div>
+
+                <!-- Thông tin sản phẩm từ Knowledge Graph -->
+                <div class="product-info-section">
+                    <h2>📚 Thông tin sản phẩm</h2>
+                    <div id="productInfo"></div>
+                </div>
+
+                <!-- Gợi ý sản phẩm -->
+                <div class="recommendations-section">
+                    <h2>💡 Gợi ý sản phẩm tương tự</h2>
+                    <div id="recommendations"></div>
+                </div>
+
+                <!-- Knowledge Graph Visualization -->
+                <div class="kg-section">
+                    <h2>🔗 Knowledge Graph</h2>
+                    <div id="kgContainer" style="height: 500px; border: 1px solid #ddd; border-radius: 8px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 - Intelligent System Development Assignment 02</p>
+            <p>E-Commerce Customer Behavior / Interest Discovery</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('predictBtn');
+            btn.textContent = 'Đang xử lý...';
+            btn.disabled = true;
+            
+            const data = {
+                age: document.getElementById('age').value,
+                rating: document.getElementById('rating').value,
+                recommended_ind: document.getElementById('recommended_ind').value,
+                feedback_count: document.getElementById('feedback_count').value,
+                division_name: document.getElementById('division_name').value,
+                department_name: document.getElementById('department_name').value,
+                review_text: document.getElementById('review_text').value
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResults(result);
+                } else {
+                    alert('Lỗi: ' + result.error);
+                }
+            } catch (error) {
+                alert('Lỗi kết nối: ' + error.message);
+            } finally {
+                btn.textContent = '🔮 Dự đoán sản phẩm';
+                btn.disabled = false;
+            }
+        });
+        
+        function displayResults(result) {
+            const section = document.getElementById('resultSection');
+            section.style.display = 'block';
+            
+            // Prediction class
+            document.getElementById('predictionClass').textContent = result.prediction;
+            
+            // Confidence
+            const confidence = result.probability ? (result.probability * 100).toFixed(1) : 'N/A';
+            document.getElementById('predictionConfidence').textContent = `Độ tin cậy: ${confidence}%`;
+            
+            // Top predictions
+            const topDiv = document.getElementById('topPredictions');
+            topDiv.innerHTML = '';
+            if (result.top_predictions) {
+                result.top_predictions.forEach(p => {
+                    const bar = document.createElement('div');
+                    bar.className = 'prediction-bar';
+                    const pct = (p.probability * 100).toFixed(1);
+                    bar.innerHTML = `
+                        <span class="prediction-label">${p.class}</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: ${pct}%"></div>
+                        </div>
+                        <span class="prediction-pct">${pct}%</span>
+                    `;
+                    topDiv.appendChild(bar);
+                });
+            }
+            
+            // Product info
+            const infoDiv = document.getElementById('productInfo');
+            infoDiv.innerHTML = '';
+            if (result.product_info) {
+                const info = result.product_info;
+                infoDiv.innerHTML = `
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Danh mục:</strong> ${info.category || info.name}
+                        </div>
+                        <div class="info-item">
+                            <strong>Bộ phận:</strong> ${info.department || 'N/A'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Phân khu:</strong> ${info.division || 'N/A'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Phong cách:</strong> ${info.styles ? info.styles.join(', ') : 'N/A'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Dịp phù hợp:</strong> ${info.occasions ? info.occasions.join(', ') : 'N/A'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Chất liệu:</strong> ${info.materials ? info.materials.join(', ') : 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Recommendations
+            const recDiv = document.getElementById('recommendations');
+            recDiv.innerHTML = '';
+            if (result.recommendations && result.recommendations.length > 0) {
+                const recList = document.createElement('div');
+                recList.className = 'recommendation-list';
+                result.recommendations.forEach(rec => {
+                    const tag = document.createElement('span');
+                    tag.className = 'recommendation-tag';
+                    tag.textContent = rec;
+                    recList.appendChild(tag);
+                });
+                recDiv.appendChild(recList);
+            } else {
+                recDiv.innerHTML = '<p>Không có gợi ý nào.</p>';
+            }
+            
+            // Knowledge Graph
+            if (result.prediction) {
+                loadKnowledgeGraph(result.prediction);
+            }
+            
+            // Scroll to result
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        async function loadKnowledgeGraph(productName) {
+            try {
+                const response = await fetch(`/kg/${encodeURIComponent(productName)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderKnowledgeGraph(data.nodes, data.edges);
+                }
+            } catch (error) {
+                console.error('Error loading knowledge graph:', error);
+            }
+        }
+        
+        function renderKnowledgeGraph(nodes, edges) {
+            const container = document.getElementById('kgContainer');
+            
+            // Chuyển đổi dữ liệu cho vis-network
+            const visNodes = nodes.map(n => ({
+                id: n.id,
+                label: n.label,
+                group: n.group,
+                shape: n.group === 'product' ? 'box' : 'dot',
+                font: { size: n.group === 'product' ? 16 : 12 }
+            }));
+            
+            const visEdges = edges.map(e => ({
+                from: e.from,
+                to: e.to,
+                label: e.label,
+                arrows: 'to',
+                font: { size: 10, align: 'middle' }
+            }));
+            
+            // Tạo network
+            const options = {
+                nodes: {
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    color: '#848484',
+                    smooth: true
+                },
+                physics: {
+                    stabilization: true,
+                    barnesHut: {
+                        gravitationalConstant: -2000,
+                        centralGravity: 0.3,
+                        springLength: 95,
+                        springConstant: 0.04,
+                        damping: 0.09
+                    }
+                },
+                layout: {
+                    improvedLayout: true
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200
+                }
+            };
+            
+            const network = new vis.Network(container, {
+                nodes: visNodes,
+                edges: visEdges
+            }, options);
+        }
+    </script>
+</body>
+</html>
