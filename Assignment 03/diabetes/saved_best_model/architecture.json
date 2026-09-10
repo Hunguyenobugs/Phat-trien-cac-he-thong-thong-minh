@@ -1,0 +1,19 @@
+{
+  "input_dim": 47,
+  "hidden_dims": [
+    128,
+    64,
+    32,
+    16
+  ],
+  "num_layers": 5,
+  "architecture_str": "47 -> 128 -> 64 -> 32 -> 16 -> 1",
+  "hidden_activation": "relu",
+  "output_activation": "sigmoid",
+  "loss": "binary_cross_entropy",
+  "optimizer": "adam",
+  "learning_rate": 0.001,
+  "batch_size": 128,
+  "l2": 1e-05,
+  "trained_at": "2026-09-10T23:36:53.829513"
+}
